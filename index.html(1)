@@ -1,472 +1,653 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vocabulary Quiz</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-* {
-    box-sizing: border-box;
-}
+    <title>English Vocabulary Quiz</title>
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    padding: 20px;
-    font-family: Arial, "Noto Sans KR", sans-serif;
-    background-color: #fff4a8;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-.app {
-    width: 100%;
-    max-width: 650px;
-    background: white;
-    border-radius: 24px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #fff4a8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            color: #333;
+        }
 
-h1 {
-    margin-bottom: 10px;
-    font-size: 32px;
-}
+        .quiz-container {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 36px 28px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(80, 70, 20, 0.18);
+        }
 
-#progress {
-    color: #666;
-    font-size: 17px;
-    margin-bottom: 20px;
-}
+        .title {
+            margin: 0 0 8px;
+            font-size: 36px;
+            color: #222;
+        }
 
-#word {
-    font-size: 42px;
-    font-weight: bold;
-    margin: 25px 0 30px;
-    color: #222;
-}
+        .subtitle {
+            margin: 0 0 26px;
+            color: #777;
+            font-size: 16px;
+        }
 
-.question {
-    font-size: 20px;
-    margin-bottom: 18px;
-}
+        .progress {
+            font-size: 15px;
+            font-weight: bold;
+            color: #8a7500;
+            margin-bottom: 18px;
+        }
 
-#choices {
-    display: grid;
-    gap: 14px;
-}
+        .word-card {
+            background: #fff9d6;
+            border: 3px solid #f4d83d;
+            border-radius: 22px;
+            padding: 28px 18px;
+            margin-bottom: 24px;
+        }
 
-.choice {
-    width: 100%;
-    min-height: 64px;
-    border: 2px solid #ddd;
-    border-radius: 15px;
-    background-color: #f8f8f8;
-    font-size: 22px;
-    font-weight: bold;
-    padding: 12px 16px;
-    cursor: pointer;
-    touch-action: manipulation;
-}
+        .question {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #555;
+        }
 
-.choice:hover:not(:disabled) {
-    background-color: #fff1a8;
-    border-color: #e0c900;
-}
+        .word {
+            margin: 0;
+            font-size: 48px;
+            font-weight: 800;
+            color: #222;
+            letter-spacing: 1px;
+        }
 
-.choice:active:not(:disabled) {
-    transform: scale(0.98);
-}
+        .instruction {
+            margin: 0 0 18px;
+            font-size: 17px;
+            font-weight: bold;
+        }
 
-.choice.wrong {
-    background-color: #ffd6d6;
-    border-color: #ef5350;
-    color: #b71c1c;
-}
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
 
-.choice.correct {
-    background-color: #d8f8df;
-    border-color: #43a047;
-    color: #176b20;
-}
+        .answer-btn {
+            width: 100%;
+            padding: 17px 18px;
+            border: 2px solid #e6d34a;
+            border-radius: 16px;
+            background: #fff;
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+        }
 
-.choice:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-}
+        .answer-btn:hover {
+            background: #fff4a8;
+            transform: translateY(-2px);
+        }
 
-#feedback {
-    min-height: 30px;
-    margin: 18px 0 8px;
-    font-size: 19px;
-    font-weight: bold;
-}
+        .answer-btn:disabled {
+            cursor: default;
+            transform: none;
+        }
 
-#hint {
-    min-height: 30px;
-    margin-bottom: 16px;
-    font-size: 18px;
-    color: #555;
-}
+        .feedback {
+            min-height: 32px;
+            margin: 22px 0 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
 
-#next,
-#restart {
-    display: none;
-    border: none;
-    border-radius: 14px;
-    padding: 15px 25px;
-    font-size: 19px;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: #222;
-    color: white;
-}
+        .next-btn {
+            display: none;
+            margin: 16px auto 0;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            background: #f4cf24;
+            color: #222;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-#restart {
-    background-color: #6c63ff;
-}
+        .next-btn:hover {
+            background: #e9c116;
+        }
 
-#celebration {
-    display: none;
-    font-size: 90px;
-    margin: 15px 0;
-}
+        .score {
+            display: none;
+            font-size: 25px;
+            font-weight: bold;
+            margin-top: 22px;
+        }
 
-#result {
-    display: none;
-    font-size: 24px;
-    font-weight: bold;
-    margin: 15px 0;
-}
+        .celebration {
+            display: none;
+            font-size: 90px;
+            margin-top: 12px;
+            animation: pop 0.6s ease;
+        }
 
-@media (max-width: 500px) {
-    .app {
-        padding: 22px 16px;
-    }
+        .hint {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #8a6500;
+        }
 
-    h1 {
-        font-size: 27px;
-    }
+        @keyframes pop {
+            0% {
+                transform: scale(0.4);
+                opacity: 0;
+            }
 
-    #word {
-        font-size: 34px;
-    }
+            70% {
+                transform: scale(1.15);
+            }
 
-    .choice {
-        font-size: 19px;
-    }
-}
-</style>
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .restart-btn {
+            display: none;
+            margin: 16px auto 0;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            background: #333;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        @media (min-width: 600px) {
+            .answers {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="app">
+    <main class="quiz-container">
 
-    <h1>📚 Vocabulary Quiz</h1>
+        <h1 class="title">Vocabulary Quiz</h1>
 
-    <div id="progress"></div>
+        <p class="subtitle">
+            Choose the synonym of each word.
+        </p>
 
-    <div id="word"></div>
+        <div class="progress" id="progress">
+            Question 1 of 5
+        </div>
 
-    <div class="question">
-        Choose the synonym.
-    </div>
+        <section class="word-card">
 
-    <div id="choices"></div>
+            <p class="question">
+                What is the synonym of:
+            </p>
 
-    <div id="feedback"></div>
+            <h2 class="word" id="word">
+                effort
+            </h2>
 
-    <div id="hint"></div>
+        </section>
 
-    <button id="next" type="button">
-        Next →
-    </button>
+        <p class="instruction">
+            Choose the correct answer.
+        </p>
 
-    <div id="celebration">
-        🥳
-    </div>
+        <div class="answers" id="answers"></div>
 
-    <div id="result"></div>
+        <div class="feedback" id="feedback"></div>
 
-    <button id="restart" type="button">
-        🔄 다시 시작
-    </button>
+        <div class="hint" id="hint"></div>
 
-</div>
+        <button
+            class="next-btn"
+            id="nextButton"
+            onclick="nextQuestion()">
+            Next →
+        </button>
 
-<script>
+        <div class="score" id="score"></div>
 
-const quizData = [
-    {
-        word: "effort",
-        answer: "attempt",
-        meaning: "노력",
-        wrong: ["forget", "avoid", "rest"]
-    },
-    {
-        word: "improve",
-        answer: "enhance",
-        meaning: "향상시키다, 개선하다",
-        wrong: ["damage", "hide", "remove"]
-    },
-    {
-        word: "valuable",
-        answer: "worthwhile",
-        meaning: "가치 있는",
-        wrong: ["useless", "ordinary", "empty"]
-    },
-    {
-        word: "prepare",
-        answer: "get ready",
-        meaning: "준비하다",
-        wrong: ["give up", "fall asleep", "give away"]
-    },
-    {
-        word: "convenient",
-        answer: "handy",
-        meaning: "편리한",
-        wrong: ["difficult", "expensive", "far"]
-    }
-];
+        <div class="celebration" id="celebration">
+            🥳
+        </div>
 
-let currentIndex = 0;
-let wrongQuestions = [];
-let reviewMode = false;
-let reviewIndex = 0;
-let answeredCorrectly = false;
-let isIntermission = false; // 안내/결과 화면용 상태 플래그 추가
+        <button
+            class="restart-btn"
+            id="restartButton"
+            onclick="restartQuiz()">
+            Try Again
+        </button>
 
-const wordElement = document.getElementById("word");
-const progressElement = document.getElementById("progress");
-const choicesElement = document.getElementById("choices");
-const feedbackElement = document.getElementById("feedback");
-const hintElement = document.getElementById("hint");
-const nextButton = document.getElementById("next");
-const celebrationElement = document.getElementById("celebration");
-const resultElement = document.getElementById("result");
-const restartButton = document.getElementById("restart");
+    </main>
 
-/* 선택지를 랜덤으로 섞는 함수 */
-function shuffle(array) {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray;
-}
 
-/* 현재 문제 가져오기 */
-function getCurrentQuestion() {
-    if (reviewMode) {
-        return wrongQuestions[reviewIndex];
-    }
-    return quizData[currentIndex];
-}
+    <script>
 
-/* 문제 화면 만들기 */
-function loadQuestion() {
-    answeredCorrectly = false;
-    isIntermission = false;
+        /* =========================
+           QUIZ DATA
+           ========================= */
 
-    const quiz = getCurrentQuestion();
+        const quizData = [
 
-    if (!quiz) {
-        finishReview();
-        return;
-    }
+            {
+                word: "effort",
+                meaning: "노력",
+                answer: "attempt",
+                choices: [
+                    "attempt",
+                    "result",
+                    "reason",
+                    "habit"
+                ]
+            },
 
-    wordElement.style.display = "block";
-    document.querySelector(".question").style.display = "block";
-    choicesElement.style.display = "grid";
-    celebrationElement.style.display = "none";
-    resultElement.style.display = "none";
-    restartButton.style.display = "none";
-    nextButton.style.display = "none";
+            {
+                word: "improve",
+                meaning: "향상시키다, 개선하다",
+                answer: "enhance",
+                choices: [
+                    "enhance",
+                    "reduce",
+                    "repeat",
+                    "remove"
+                ]
+            },
 
-    feedbackElement.textContent = "";
-    hintElement.textContent = "";
+            {
+                word: "valuable",
+                meaning: "가치 있는",
+                answer: "worthwhile",
+                choices: [
+                    "worthwhile",
+                    "ordinary",
+                    "simple",
+                    "empty"
+                ]
+            },
 
-    wordElement.textContent = quiz.word;
+            {
+                word: "prepare",
+                meaning: "준비하다",
+                answer: "get ready",
+                choices: [
+                    "get ready",
+                    "give up",
+                    "look after",
+                    "find out"
+                ]
+            },
 
-    if (reviewMode) {
-        progressElement.textContent = `복습 문제 ${reviewIndex + 1} / ${wrongQuestions.length}`;
-    } else {
-        progressElement.textContent = `문제 ${currentIndex + 1} / ${quizData.length}`;
-    }
-
-    choicesElement.innerHTML = "";
-
-    const choices = shuffle([quiz.answer, ...quiz.wrong]);
-
-    choices.forEach(function(choice) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "choice";
-        button.textContent = choice;
-
-        button.addEventListener("click", function() {
-            checkAnswer(button, choice, quiz);
-        });
-
-        choicesElement.appendChild(button);
-    });
-}
-
-/* 정답 확인 */
-function checkAnswer(button, selectedAnswer, quiz) {
-    if (answeredCorrectly) {
-        return;
-    }
-
-    /* 정답 */
-    if (selectedAnswer === quiz.answer) {
-        answeredCorrectly = true;
-        button.classList.add("correct");
-
-        const allButtons = document.querySelectorAll(".choice");
-        allButtons.forEach(function(btn) {
-            btn.disabled = true;
-        });
-
-        feedbackElement.textContent = "🎉 Correct! 잘했어요!";
-        feedbackElement.style.color = "#16852a";
-        hintElement.textContent = "";
-
-        nextButton.style.display = "inline-block";
-
-        if (reviewMode) {
-            if (reviewIndex + 1 < wrongQuestions.length) {
-                nextButton.textContent = "다음 복습 문제 →";
-            } else {
-                nextButton.textContent = "복습 완료 →";
+            {
+                word: "convenient",
+                meaning: "편리한",
+                answer: "handy",
+                choices: [
+                    "handy",
+                    "difficult",
+                    "distant",
+                    "expensive"
+                ]
             }
-        } else {
-            if (currentIndex + 1 < quizData.length) {
-                nextButton.textContent = "다음 문제 →";
-            } else {
-                nextButton.textContent = "결과 보기 →";
-            }
-        }
-    }
-    /* 오답 */
-    else {
-        if (!reviewMode && !wrongQuestions.includes(quiz)) {
-            wrongQuestions.push(quiz);
+
+        ];
+
+
+        /* =========================
+           QUIZ VARIABLES
+           ========================= */
+
+        let currentQuestion = 0;
+
+        let score = 0;
+
+        let answered = false;
+
+
+        /* =========================
+           SHUFFLE
+           ========================= */
+
+        function shuffle(array) {
+
+            return [...array].sort(
+                () => Math.random() - 0.5
+            );
+
         }
 
-        button.classList.add("wrong");
-        button.disabled = true;
 
-        feedbackElement.textContent = "❌ 다시 생각해 보세요!";
-        feedbackElement.style.color = "#d32f2f";
+        /* =========================
+           LOAD QUESTION
+           ========================= */
 
-        hintElement.textContent = `💡 힌트: ${quiz.word} = ${quiz.meaning}`;
-        nextButton.style.display = "none";
-    }
-}
+        function loadQuestion() {
 
-/* 다음 문제 */
-function nextQuestion() {
-    // 중간 안내 화면일 때는 바로 다음(복습 문제)으로 넘어감
-    if (isIntermission) {
+            const quiz =
+                quizData[currentQuestion];
+
+
+            // 진행 상황
+            document.getElementById("progress").innerText =
+                `Question ${currentQuestion + 1} of ${quizData.length}`;
+
+
+            // 단어
+            document.getElementById("word").innerText =
+                quiz.word;
+
+
+            // 답안 초기화
+            const answersContainer =
+                document.getElementById("answers");
+
+            answersContainer.innerHTML = "";
+
+
+            // 피드백 초기화
+            document.getElementById("feedback").innerText = "";
+
+            document.getElementById("hint").innerText = "";
+
+
+            // Next 버튼 숨기기
+            document.getElementById("nextButton")
+                .style.display = "none";
+
+
+            // 축하 표시 숨기기
+            document.getElementById("celebration")
+                .style.display = "none";
+
+
+            // 문제 다시 풀 수 있도록 설정
+            answered = false;
+
+
+            // 보기 섞기
+            shuffle(quiz.choices).forEach(choice => {
+
+                const button =
+                    document.createElement("button");
+
+
+                button.className =
+                    "answer-btn";
+
+
+                button.innerText =
+                    choice;
+
+
+                button.onclick = () =>
+                    checkAnswer(choice, button);
+
+
+                answersContainer.appendChild(button);
+
+            });
+
+        }
+
+
+        /* =========================
+           CHECK ANSWER
+           ========================= */
+
+        function checkAnswer(
+            selectedAnswer,
+            selectedButton
+        ) {
+
+            // 이미 답을 선택했다면 다시 실행하지 않음
+            if (answered) return;
+
+            answered = true;
+
+
+            const quiz =
+                quizData[currentQuestion];
+
+
+            const buttons =
+                document.querySelectorAll(".answer-btn");
+
+
+            // 모든 버튼 비활성화
+            buttons.forEach(button => {
+
+                button.disabled = true;
+
+
+                // 정답 표시
+                if (
+                    button.innerText ===
+                    quiz.answer
+                ) {
+
+                    button.style.backgroundColor =
+                        "#dff5d8";
+
+                    button.style.borderColor =
+                        "#72b85a";
+
+                }
+
+            });
+
+
+            /* =========================
+               CORRECT
+               ========================= */
+
+            if (
+                selectedAnswer ===
+                quiz.answer
+            ) {
+
+                score++;
+
+
+                document.getElementById(
+                    "feedback"
+                ).innerText =
+                    "Correct! Well done!";
+
+
+                document.getElementById(
+                    "feedback"
+                ).style.color =
+                    "#4d8c35";
+
+            }
+
+
+            /* =========================
+               INCORRECT
+               ========================= */
+
+            else {
+
+                document.getElementById(
+                    "feedback"
+                ).innerText =
+                    `Incorrect. The answer is "${quiz.answer}".`;
+
+
+                document.getElementById(
+                    "feedback"
+                ).style.color =
+                    "#c44b4b";
+
+
+                // 단어 뜻 Hint 표시
+                document.getElementById(
+                    "hint"
+                ).innerText =
+                    `💡 Hint: ${quiz.word} = ${quiz.meaning}`;
+
+
+                // 사용자가 선택한 오답 표시
+                selectedButton.style.backgroundColor =
+                    "#ffe0e0";
+
+
+                selectedButton.style.borderColor =
+                    "#e07070";
+
+            }
+
+
+            /* =========================
+               NEXT QUESTION / FINAL
+               ========================= */
+
+            if (
+                currentQuestion <
+                quizData.length - 1
+            ) {
+
+                // 아직 문제가 남아 있으면 Next 버튼
+                document.getElementById(
+                    "nextButton"
+                ).style.display =
+                    "block";
+
+            }
+
+            else {
+
+                // 최종 점수
+                document.getElementById(
+                    "score"
+                ).innerText =
+                    `Your score: ${score} / ${quizData.length}`;
+
+
+                document.getElementById(
+                    "score"
+                ).style.display =
+                    "block";
+
+
+                /* =========================
+                   PERFECT SCORE
+                   ========================= */
+
+                if (
+                    score ===
+                    quizData.length
+                ) {
+
+                    document.getElementById(
+                        "celebration"
+                    ).style.display =
+                        "block";
+
+
+                    document.getElementById(
+                        "feedback"
+                    ).innerText =
+                        "Perfect! You got everything right!";
+
+
+                    document.getElementById(
+                        "feedback"
+                    ).style.color =
+                        "#d69b00";
+
+                }
+
+
+                // 다시하기 버튼
+                document.getElementById(
+                    "restartButton"
+                ).style.display =
+                    "block";
+
+            }
+
+        }
+
+
+        /* =========================
+           NEXT QUESTION
+           ========================= */
+
+        function nextQuestion() {
+
+            currentQuestion++;
+
+            loadQuestion();
+
+        }
+
+
+        /* =========================
+           RESTART QUIZ
+           ========================= */
+
+        function restartQuiz() {
+
+            currentQuestion = 0;
+
+            score = 0;
+
+
+            document.getElementById(
+                "score"
+            ).style.display =
+                "none";
+
+
+            document.getElementById(
+                "restartButton"
+            ).style.display =
+                "none";
+
+
+            loadQuestion();
+
+        }
+
+
+        /* =========================
+           START QUIZ
+           ========================= */
+
         loadQuestion();
-        return;
-    }
 
-    if (!answeredCorrectly) {
-        return;
-    }
-
-    if (reviewMode) {
-        reviewIndex++;
-        if (reviewIndex < wrongQuestions.length) {
-            loadQuestion();
-        } else {
-            finishReview();
-        }
-    } else {
-        currentIndex++;
-        if (currentIndex < quizData.length) {
-            loadQuestion();
-        } else {
-            finishMainRound();
-        }
-    }
-}
-
-/* 첫 번째 문제 풀이 완료 */
-function finishMainRound() {
-    isIntermission = true;
-
-    wordElement.style.display = "none";
-    document.querySelector(".question").style.display = "none";
-    choicesElement.style.display = "none";
-    feedbackElement.textContent = "";
-    hintElement.textContent = "";
-
-    if (wrongQuestions.length === 0) {
-        progressElement.textContent = "🎉 모든 문제 정답!";
-        resultElement.textContent = "완벽해요! 모든 문제를 맞혔어요!";
-        resultElement.style.display = "block";
-        celebrationElement.style.display = "block";
-        nextButton.style.display = "none";
-        restartButton.style.display = "inline-block";
-    } else {
-        progressElement.textContent = "1차 풀이 완료!";
-        resultElement.textContent = `틀린 문제 ${wrongQuestions.length}개가 있어요.`;
-        resultElement.style.display = "block";
-
-        nextButton.textContent = `틀린 문제 ${wrongQuestions.length}개 다시 풀기 →`;
-        nextButton.style.display = "inline-block";
-
-        reviewMode = true;
-        reviewIndex = 0;
-    }
-}
-
-/* 틀린 문제 복습 완료 */
-function finishReview() {
-    isIntermission = true;
-
-    wordElement.style.display = "none";
-    document.querySelector(".question").style.display = "none";
-    choicesElement.style.display = "none";
-    feedbackElement.textContent = "";
-    hintElement.textContent = "";
-    nextButton.style.display = "none";
-
-    progressElement.textContent = "🎉 복습 완료!";
-    resultElement.textContent = "모든 문제를 다시 풀었어요!";
-    resultElement.style.display = "block";
-    celebrationElement.style.display = "block";
-    restartButton.style.display = "inline-block";
-}
-
-/* 다시 시작 */
-function restartQuiz() {
-    currentIndex = 0;
-    wrongQuestions = [];
-    reviewMode = false;
-    reviewIndex = 0;
-    answeredCorrectly = false;
-    isIntermission = false;
-
-    loadQuestion();
-}
-
-/* 버튼 이벤트 */
-nextButton.addEventListener("click", nextQuestion);
-restartButton.addEventListener("click", restartQuiz);
-
-/* 앱 시작 */
-loadQuestion();
-
-</script>
+    </script>
 
 </body>
+
 </html>
