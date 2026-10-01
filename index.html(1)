@@ -198,603 +198,272 @@ h1 {
 
 </div>
 
-
 <script>
 
 const quizData = [
-
     {
         word: "effort",
         answer: "attempt",
         meaning: "노력",
-        wrong: [
-            "forget",
-            "avoid",
-            "rest"
-        ]
+        wrong: ["forget", "avoid", "rest"]
     },
-
     {
         word: "improve",
         answer: "enhance",
         meaning: "향상시키다, 개선하다",
-        wrong: [
-            "damage",
-            "hide",
-            "remove"
-        ]
+        wrong: ["damage", "hide", "remove"]
     },
-
     {
         word: "valuable",
         answer: "worthwhile",
         meaning: "가치 있는",
-        wrong: [
-            "useless",
-            "ordinary",
-            "empty"
-        ]
+        wrong: ["useless", "ordinary", "empty"]
     },
-
     {
         word: "prepare",
         answer: "get ready",
         meaning: "준비하다",
-        wrong: [
-            "give up",
-            "fall asleep",
-            "give away"
-        ]
+        wrong: ["give up", "fall asleep", "give away"]
     },
-
     {
         word: "convenient",
         answer: "handy",
         meaning: "편리한",
-        wrong: [
-            "difficult",
-            "expensive",
-            "far"
-        ]
+        wrong: ["difficult", "expensive", "far"]
     }
-
 ];
 
-
 let currentIndex = 0;
-
 let wrongQuestions = [];
-
 let reviewMode = false;
-
 let reviewIndex = 0;
-
 let answeredCorrectly = false;
+let isIntermission = false; // 안내/결과 화면용 상태 플래그 추가
 
-
-const wordElement =
-    document.getElementById("word");
-
-const progressElement =
-    document.getElementById("progress");
-
-const choicesElement =
-    document.getElementById("choices");
-
-const feedbackElement =
-    document.getElementById("feedback");
-
-const hintElement =
-    document.getElementById("hint");
-
-const nextButton =
-    document.getElementById("next");
-
-const celebrationElement =
-    document.getElementById("celebration");
-
-const resultElement =
-    document.getElementById("result");
-
-const restartButton =
-    document.getElementById("restart");
-
+const wordElement = document.getElementById("word");
+const progressElement = document.getElementById("progress");
+const choicesElement = document.getElementById("choices");
+const feedbackElement = document.getElementById("feedback");
+const hintElement = document.getElementById("hint");
+const nextButton = document.getElementById("next");
+const celebrationElement = document.getElementById("celebration");
+const resultElement = document.getElementById("result");
+const restartButton = document.getElementById("restart");
 
 /* 선택지를 랜덤으로 섞는 함수 */
-
 function shuffle(array) {
-
     const newArray = [...array];
-
-    for (
-        let i = newArray.length - 1;
-        i > 0;
-        i--
-    ) {
-
-        const j =
-            Math.floor(Math.random() * (i + 1));
-
-        [
-            newArray[i],
-            newArray[j]
-        ] =
-        [
-            newArray[j],
-            newArray[i]
-        ];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-
     return newArray;
 }
 
-
 /* 현재 문제 가져오기 */
-
 function getCurrentQuestion() {
-
     if (reviewMode) {
-
         return wrongQuestions[reviewIndex];
-
     }
-
     return quizData[currentIndex];
 }
 
-
 /* 문제 화면 만들기 */
-
 function loadQuestion() {
-
     answeredCorrectly = false;
+    isIntermission = false;
 
     const quiz = getCurrentQuestion();
 
     if (!quiz) {
-
         finishReview();
-
         return;
     }
 
-
     wordElement.style.display = "block";
-
-    document.querySelector(".question")
-        .style.display = "block";
-
+    document.querySelector(".question").style.display = "block";
     choicesElement.style.display = "grid";
-
     celebrationElement.style.display = "none";
-
     resultElement.style.display = "none";
-
     restartButton.style.display = "none";
-
     nextButton.style.display = "none";
 
-
     feedbackElement.textContent = "";
-
     hintElement.textContent = "";
 
-
-    wordElement.textContent =
-        quiz.word;
-
+    wordElement.textContent = quiz.word;
 
     if (reviewMode) {
-
-        progressElement.textContent =
-            `복습 문제 ${reviewIndex + 1} / ${wrongQuestions.length}`;
-
+        progressElement.textContent = `복습 문제 ${reviewIndex + 1} / ${wrongQuestions.length}`;
     } else {
-
-        progressElement.textContent =
-            `문제 ${currentIndex + 1} / ${quizData.length}`;
-
+        progressElement.textContent = `문제 ${currentIndex + 1} / ${quizData.length}`;
     }
-
 
     choicesElement.innerHTML = "";
 
-
-    const choices = shuffle([
-        quiz.answer,
-        ...quiz.wrong
-    ]);
-
-
-    /*
-       중요:
-       HTML onclick 대신 addEventListener를 사용해서
-       버튼 선택이 제대로 작동하도록 함.
-    */
+    const choices = shuffle([quiz.answer, ...quiz.wrong]);
 
     choices.forEach(function(choice) {
-
-        const button =
-            document.createElement("button");
-
+        const button = document.createElement("button");
         button.type = "button";
-
         button.className = "choice";
-
         button.textContent = choice;
 
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                checkAnswer(
-                    button,
-                    choice,
-                    quiz
-                );
-
-            }
-        );
-
+        button.addEventListener("click", function() {
+            checkAnswer(button, choice, quiz);
+        });
 
         choicesElement.appendChild(button);
-
     });
-
 }
 
-
 /* 정답 확인 */
-
-function checkAnswer(
-    button,
-    selectedAnswer,
-    quiz
-) {
-
+function checkAnswer(button, selectedAnswer, quiz) {
     if (answeredCorrectly) {
         return;
     }
 
-
     /* 정답 */
-
     if (selectedAnswer === quiz.answer) {
-
         answeredCorrectly = true;
-
-
         button.classList.add("correct");
 
-
-        const allButtons =
-            document.querySelectorAll(".choice");
-
-
+        const allButtons = document.querySelectorAll(".choice");
         allButtons.forEach(function(btn) {
-
             btn.disabled = true;
-
         });
 
-
-        feedbackElement.textContent =
-            "🎉 Correct! 잘했어요!";
-
-        feedbackElement.style.color =
-            "#16852a";
-
-
+        feedbackElement.textContent = "🎉 Correct! 잘했어요!";
+        feedbackElement.style.color = "#16852a";
         hintElement.textContent = "";
 
-
-        nextButton.style.display =
-            "inline-block";
-
+        nextButton.style.display = "inline-block";
 
         if (reviewMode) {
-
-            if (
-                reviewIndex + 1
-                <
-                wrongQuestions.length
-            ) {
-
-                nextButton.textContent =
-                    "다음 복습 문제 →";
-
+            if (reviewIndex + 1 < wrongQuestions.length) {
+                nextButton.textContent = "다음 복습 문제 →";
             } else {
-
-                nextButton.textContent =
-                    "복습 완료 →";
-
+                nextButton.textContent = "복습 완료 →";
             }
-
         } else {
-
-            if (
-                currentIndex + 1
-                <
-                quizData.length
-            ) {
-
-                nextButton.textContent =
-                    "다음 문제 →";
-
+            if (currentIndex + 1 < quizData.length) {
+                nextButton.textContent = "다음 문제 →";
             } else {
-
-                nextButton.textContent =
-                    "결과 보기 →";
-
+                nextButton.textContent = "결과 보기 →";
             }
-
         }
-
     }
-
-
     /* 오답 */
-
     else {
-
-        /*
-           처음 틀린 문제라면
-           복습 목록에 저장
-        */
-
-        if (
-            !reviewMode &&
-            !wrongQuestions.includes(quiz)
-        ) {
-
+        if (!reviewMode && !wrongQuestions.includes(quiz)) {
             wrongQuestions.push(quiz);
-
         }
-
-
-        /* 선택한 오답 버튼만 비활성화 */
 
         button.classList.add("wrong");
-
         button.disabled = true;
 
+        feedbackElement.textContent = "❌ 다시 생각해 보세요!";
+        feedbackElement.style.color = "#d32f2f";
 
-        feedbackElement.textContent =
-            "❌ 다시 생각해 보세요!";
-
-        feedbackElement.style.color =
-            "#d32f2f";
-
-
-        /*
-           정답을 알려주지 않고
-           한국어 뜻만 힌트로 제공
-        */
-
-        hintElement.textContent =
-            `💡 힌트: ${quiz.word} = ${quiz.meaning}`;
-
-
-        /*
-           문제를 넘어가지 않음.
-           다른 답을 다시 선택할 수 있음.
-        */
-
-        nextButton.style.display =
-            "none";
-
+        hintElement.textContent = `💡 힌트: ${quiz.word} = ${quiz.meaning}`;
+        nextButton.style.display = "none";
     }
-
 }
 
-
 /* 다음 문제 */
-
 function nextQuestion() {
+    // 중간 안내 화면일 때는 바로 다음(복습 문제)으로 넘어감
+    if (isIntermission) {
+        loadQuestion();
+        return;
+    }
 
     if (!answeredCorrectly) {
         return;
     }
 
-
     if (reviewMode) {
-
         reviewIndex++;
-
-
-        if (
-            reviewIndex
-            <
-            wrongQuestions.length
-        ) {
-
+        if (reviewIndex < wrongQuestions.length) {
             loadQuestion();
-
         } else {
-
             finishReview();
-
         }
-
     } else {
-
         currentIndex++;
-
-
-        if (
-            currentIndex
-            <
-            quizData.length
-        ) {
-
+        if (currentIndex < quizData.length) {
             loadQuestion();
-
         } else {
-
             finishMainRound();
-
         }
-
     }
-
 }
-
 
 /* 첫 번째 문제 풀이 완료 */
-
 function finishMainRound() {
+    isIntermission = true;
 
-    wordElement.style.display =
-        "none";
-
-    document.querySelector(".question")
-        .style.display = "none";
-
-    choicesElement.style.display =
-        "none";
-
+    wordElement.style.display = "none";
+    document.querySelector(".question").style.display = "none";
+    choicesElement.style.display = "none";
     feedbackElement.textContent = "";
-
     hintElement.textContent = "";
-
-
-    /*
-       틀린 문제가 하나도 없으면
-       바로 축하 화면
-    */
 
     if (wrongQuestions.length === 0) {
+        progressElement.textContent = "🎉 모든 문제 정답!";
+        resultElement.textContent = "완벽해요! 모든 문제를 맞혔어요!";
+        resultElement.style.display = "block";
+        celebrationElement.style.display = "block";
+        nextButton.style.display = "none";
+        restartButton.style.display = "inline-block";
+    } else {
+        progressElement.textContent = "1차 풀이 완료!";
+        resultElement.textContent = `틀린 문제 ${wrongQuestions.length}개가 있어요.`;
+        resultElement.style.display = "block";
 
-        progressElement.textContent =
-            "🎉 모든 문제 정답!";
-
-        resultElement.textContent =
-            "완벽해요! 모든 문제를 맞혔어요!";
-
-        resultElement.style.display =
-            "block";
-
-        celebrationElement.style.display =
-            "block";
-
-        nextButton.style.display =
-            "none";
-
-        restartButton.style.display =
-            "inline-block";
-
-    }
-
-
-    /*
-       틀린 문제가 있으면
-       복습 단계 시작
-    */
-
-    else {
-
-        progressElement.textContent =
-            "1차 풀이 완료!";
-
-        resultElement.textContent =
-            `틀린 문제 ${wrongQuestions.length}개가 있어요.`;
-
-        resultElement.style.display =
-            "block";
-
-
-        nextButton.textContent =
-            `틀린 문제 ${wrongQuestions.length}개 다시 풀기 →`;
-
-        nextButton.style.display =
-            "inline-block";
-
+        nextButton.textContent = `틀린 문제 ${wrongQuestions.length}개 다시 풀기 →`;
+        nextButton.style.display = "inline-block";
 
         reviewMode = true;
-
         reviewIndex = 0;
-
     }
-
 }
-
 
 /* 틀린 문제 복습 완료 */
-
 function finishReview() {
+    isIntermission = true;
 
-    wordElement.style.display =
-        "none";
-
-    document.querySelector(".question")
-        .style.display = "none";
-
-    choicesElement.style.display =
-        "none";
-
+    wordElement.style.display = "none";
+    document.querySelector(".question").style.display = "none";
+    choicesElement.style.display = "none";
     feedbackElement.textContent = "";
-
     hintElement.textContent = "";
+    nextButton.style.display = "none";
 
-    nextButton.style.display =
-        "none";
-
-
-    progressElement.textContent =
-        "🎉 복습 완료!";
-
-    resultElement.textContent =
-        "모든 문제를 다시 풀었어요!";
-
-    resultElement.style.display =
-        "block";
-
-    celebrationElement.style.display =
-        "block";
-
-    restartButton.style.display =
-        "inline-block";
-
+    progressElement.textContent = "🎉 복습 완료!";
+    resultElement.textContent = "모든 문제를 다시 풀었어요!";
+    resultElement.style.display = "block";
+    celebrationElement.style.display = "block";
+    restartButton.style.display = "inline-block";
 }
-
 
 /* 다시 시작 */
-
 function restartQuiz() {
-
     currentIndex = 0;
-
     wrongQuestions = [];
-
     reviewMode = false;
-
     reviewIndex = 0;
-
     answeredCorrectly = false;
-
+    isIntermission = false;
 
     loadQuestion();
-
 }
 
-
 /* 버튼 이벤트 */
-
-nextButton.addEventListener(
-    "click",
-    nextQuestion
-);
-
-
-restartButton.addEventListener(
-    "click",
-    restartQuiz
-);
-
+nextButton.addEventListener("click", nextQuestion);
+restartButton.addEventListener("click", restartQuiz);
 
 /* 앱 시작 */
-
 loadQuestion();
 
 </script>
