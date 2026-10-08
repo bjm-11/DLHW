@@ -175,3 +175,96 @@
         <option value="1" selected>1.0× Normal</option>
         <option value="1.15">1.15×</option>
         <option value="1.3">1.3× Fast</option>
+      </select>
+    </label>
+
+    <label>
+      Pitch
+      <select id="pitch">
+        <option value="0.8">Low</option>
+        <option value="1" selected>Normal</option>
+        <option value="1.2">High</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="status" class="status">Ready</div>
+</main>
+
+<script>
+  let voices = [];
+
+  function loadVoices() {
+    voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  }
+
+  loadVoices();
+  if (typeof speechSynthesis !== "undefined" && "onvoiceschanged" in speechSynthesis) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function findVoice(type) {
+    const targetLanguage = type === "american" ? "en-US" : "en-GB";
+    let voice = voices.find(v => v.lang === targetLanguage);
+    if (voice) return voice;
+
+    const region = type === "american" ? "en-us" : "en-gb";
+    voice = voices.find(v => v.lang.toLowerCase() === region);
+    if (voice) return voice;
+
+    return voices.find(v => v.lang.toLowerCase().startsWith("en"));
+  }
+
+  function speak(type) {
+    const text = document.getElementById("text").value.trim();
+    const status = document.getElementById("status");
+
+    if (!text) {
+      status.textContent = "문장을 먼저 입력해주세요.";
+      return;
+    }
+
+    if (!('speechSynthesis' in window)) {
+      status.textContent = "현재 브라우저는 음성합성(TTS)을 지원하지 않습니다.";
+      return;
+    }
+
+    speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = findVoice(type);
+
+    utterance.lang = type === "american" ? "en-US" : "en-GB";
+    utterance.rate = Number(document.getElementById("speed").value);
+    utterance.pitch = Number(document.getElementById("pitch").value);
+
+    if (voice) {
+      utterance.voice = voice;
+      status.textContent = type === "american"
+        ? "🇺🇸 미국식 발음으로 재생 중..."
+        : "🇬🇧 영국식 발음으로 재생 중...";
+    } else {
+      status.textContent = "해당 지역 음성을 찾지 못해 기본 영어 음성으로 재생합니다.";
+    }
+
+    utterance.onend = function () {
+      status.textContent = "재생이 완료되었습니다.";
+    };
+
+    utterance.onerror = function () {
+      status.textContent = "재생 중 오류가 발생했습니다.";
+    };
+
+    speechSynthesis.speak(utterance);
+  }
+
+  function stopSpeaking() {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
+    document.getElementById("status").textContent = "정지되었습니다.";
+  }
+</script>
+
+</body>
+</html>
